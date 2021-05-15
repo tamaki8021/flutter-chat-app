@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatPage extends StatefulWidget {
   ChatPage(this._userName);
@@ -62,6 +63,15 @@ class _ChatPageState extends State<ChatPage> {
 
   _handleSubmit(String message) {
     _controller.text = "";
-    print(message);
+    var db = Firestore.instance;
+    db.collection("chat_room").add({
+      "user_name": widget._userName,
+      "message": message,
+      "created_at": DateTime.now(),
+    }).then((value) {
+      print("成功！！");
+    }).catchError((e) {
+      print(e);
+    });
   }
 }
