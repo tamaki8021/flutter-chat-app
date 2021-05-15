@@ -9,6 +9,8 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  final _controller = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,6 +36,8 @@ class _ChatPageState extends State<ChatPage> {
                 children: <Widget>[
                   Flexible(
                       child: TextField(
+                    controller: _controller,
+                    onSubmitted: _handleSubmit,
                     decoration: InputDecoration.collapsed(hintText: "メッセージの送信"),
                   )),
                   Container(
@@ -42,7 +46,9 @@ class _ChatPageState extends State<ChatPage> {
                         Icons.send,
                         color: Colors.blue,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        _handleSubmit(_controller.text);
+                      },
                     ),
                   )
                 ],
@@ -52,5 +58,10 @@ class _ChatPageState extends State<ChatPage> {
         ),
       ),
     );
+  }
+
+  _handleSubmit(String message) {
+    _controller.text = "";
+    print(message);
   }
 }
