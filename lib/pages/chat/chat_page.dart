@@ -23,11 +23,37 @@ class _ChatPageState extends State<ChatPage> {
         child: Column(
           children: <Widget>[
             Flexible(
-                child: ListView.builder(
+              child: StreamBuilder<QuerySnapshot>(
+                // documentに更新があったときにリアルタイムで画面の描写を更新
+                stream: Firestore.instance
+                    .collection("chat_room")
+                    .orderBy("created_at", descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return Container();
+                  return ListView.builder(
                     padding: EdgeInsets.all(8.0),
                     reverse: true,
-                    itemCount: 10,
-                    itemBuilder: (_, int index) {})),
+                    itemBuilder: (_, int index) {
+                      DocumentSnapshot document =
+                          snapshot.data.documents[index];
+                      bool isOwnMessage = false;
+
+                      if (document['user_name'] == widget._userName) {
+                        isOwnMessage = true;
+                      }
+
+                      return isOwnMessage
+                          ? _ownMessage(
+                              document['message'], document['user_name'])
+                          : _message(
+                              document['message'], document['user_name']);
+                    },
+                    itemCount: snapshot.data.documents.length,
+                  );
+                },
+              ),
+            ),
             Divider(
               height: 1.0,
             ),
@@ -58,6 +84,43 @@ class _ChatPageState extends State<ChatPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _message(String message, String userName) {
+    return Row(
+      children: <Widget>[
+        Icon(Icons.person),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(
+              height: 10.0,
+            ),
+            Text(userName),
+            Text(message),
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget _ownMessage(String message, String userName) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(
+              height: 10.0,
+            ),
+            Text(userName),
+            Text(message),
+          ],
+        ),
+        Icon(Icons.person)
+      ],
     );
   }
 
